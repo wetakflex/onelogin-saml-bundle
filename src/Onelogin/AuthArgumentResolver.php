@@ -17,11 +17,11 @@ use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
  * Yields the OneLogin Auth instance for current request
  * (default or according to an idp parameter).
  */
-final class AuthArgumentResolver implements ValueResolverInterface
+final readonly class AuthArgumentResolver implements ValueResolverInterface
 {
     public function __construct(
-        private readonly AuthRegistryInterface $authRegistry,
-        private readonly IdpResolverInterface $idpResolver,
+        private AuthRegistryInterface $authRegistry,
+        private IdpResolverInterface $idpResolver,
     ) {}
 
     public function resolve(Request $request, ArgumentMetadata $argument): iterable
@@ -31,12 +31,12 @@ final class AuthArgumentResolver implements ValueResolverInterface
         }
 
         $idp = $this->idpResolver->resolve($request);
-        if ($idp && !$this->authRegistry->hasService($idp)) {
+        if (($idp !== null && $idp !== '') && !$this->authRegistry->hasService($idp)) {
             throw new BadRequestHttpException('There is no OneLogin PHP toolkit settings for IdP "'.$idp.'". See nbgrp_onelogin_saml config ("onelogin_settings" section).');
         }
 
         try {
-            yield $idp
+            yield ($idp !== null && $idp !== '')
                 ? $this->authRegistry->getService($idp)
                 : $this->authRegistry->getDefaultService();
         } catch (\RuntimeException $exception) {

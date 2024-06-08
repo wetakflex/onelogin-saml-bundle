@@ -6,15 +6,15 @@ declare(strict_types=1);
 namespace Nbgrp\Tests\OneloginSamlBundle\Onelogin;
 
 use Nbgrp\OneloginSamlBundle\Onelogin\AuthFactory;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
- * @covers \Nbgrp\OneloginSamlBundle\Onelogin\AuthFactory
- *
  * @internal
  */
+#[CoversClass(AuthFactory::class)]
 final class AuthFactoryTest extends TestCase
 {
     public function testReplace(): void

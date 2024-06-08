@@ -9,48 +9,31 @@ use Nbgrp\OneloginSamlBundle\EventListener\Security\SamlLogoutListener;
 use Nbgrp\OneloginSamlBundle\Idp\IdpResolver;
 use Nbgrp\OneloginSamlBundle\Idp\IdpResolverInterface;
 use Nbgrp\OneloginSamlBundle\Onelogin\AuthRegistry;
+use Nbgrp\OneloginSamlBundle\Onelogin\AuthRegistryInterface;
 use Nbgrp\OneloginSamlBundle\Security\Http\Authenticator\SamlAuthenticator;
 use Nbgrp\OneloginSamlBundle\Security\Http\Authenticator\Token\SamlToken;
 use Nbgrp\Tests\OneloginSamlBundle\TestUser;
 use OneLogin\Saml2\Auth;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Http\Event\LogoutEvent;
 
 /**
- * @covers \Nbgrp\OneloginSamlBundle\EventListener\Security\SamlLogoutListener
- *
  * @internal
  */
+#[CoversClass(SamlLogoutListener::class)]
 final class SamlLogoutListenerTest extends TestCase
 {
-    /**
-     * @dataProvider provideCases
-     */
-    public function test(AuthRegistry $authRegistry, IdpResolverInterface $ipdResolver, Request $request, ?TokenInterface $token): void
-    {
-        $event = $this->createMock(LogoutEvent::class);
-        $event
-            ->method('getRequest')
-            ->willReturn($request)
-        ;
-        $event
-            ->expects($token ? self::once() : self::never())
-            ->method('getToken')
-            ->willReturn($token)
-        ;
-
-        (new SamlLogoutListener($authRegistry, $ipdResolver))->processSingleLogout($event);
-    }
-
-    public function provideCases(): iterable
+    public static function provideCases(): iterable
     {
         yield 'No Auth service' => [
-            'authRegistry' => (function (): AuthRegistry {
-                $auth = $this->createMock(Auth::class);
+            'authRegistry' => static function (TestCase $case): AuthRegistryInterface {
+                $auth = $case->createMock(Auth::class);
                 $auth
-                    ->expects(self::never())
+                    ->expects($case->never())
                     ->method('processSLO')
                 ;
 
@@ -58,17 +41,17 @@ final class SamlLogoutListenerTest extends TestCase
                 $authRegistry->addService('foo', $auth);
 
                 return $authRegistry;
-            })(),
+            },
             'ipdResolver' => new IdpResolver('idp'),
             'request' => Request::create('/logout', 'GET', ['idp' => 'unknown']),
             'token' => null,
         ];
 
         yield 'Custom Auth service without SAML token' => [
-            'authRegistry' => (function (): AuthRegistry {
-                $auth = $this->createMock(Auth::class);
+            'authRegistry' => static function (TestCase $case): AuthRegistryInterface {
+                $auth = $case->createMock(Auth::class);
                 $auth
-                    ->expects(self::never())
+                    ->expects($case->never())
                     ->method('processSLO')
                 ;
 
@@ -76,15 +59,15 @@ final class SamlLogoutListenerTest extends TestCase
                 $authRegistry->addService('foo', $auth);
 
                 return $authRegistry;
-            })(),
+            },
             'ipdResolver' => new IdpResolver('idp'),
             'request' => Request::create('/logout', 'GET', ['idp' => 'foo']),
-            'token' => $this->createStub(TokenInterface::class),
+            'token' => self::createStub(TokenInterface::class),
         ];
 
         yield 'Logout without session index' => [
-            'authRegistry' => (function (): AuthRegistry {
-                $auth = $this->createMock(Auth::class);
+            'authRegistry' => static function (TestCase $case): AuthRegistryInterface {
+                $auth = $case->createMock(Auth::class);
                 $auth
                     ->method('processSLO')
                     ->willThrowException(new \OneLogin\Saml2\Error('error'))
@@ -102,15 +85,15 @@ final class SamlLogoutListenerTest extends TestCase
                 $authRegistry->addService('foo', $auth);
 
                 return $authRegistry;
-            })(),
+            },
             'ipdResolver' => new IdpResolver('idp'),
             'request' => Request::create('/logout'),
             'token' => new SamlToken(new TestUser('tester'), 'foo', [], []),
         ];
 
         yield 'Logout with session index' => [
-            'authRegistry' => (function (): AuthRegistry {
-                $auth = $this->createMock(Auth::class);
+            'authRegistry' => static function (TestCase $case): AuthRegistryInterface {
+                $auth = $case->createMock(Auth::class);
                 $auth
                     ->method('processSLO')
                     ->willThrowException(new \OneLogin\Saml2\Error('error'))
@@ -128,10 +111,30 @@ final class SamlLogoutListenerTest extends TestCase
                 $authRegistry->addService('foo', $auth);
 
                 return $authRegistry;
-            })(),
+            },
             'ipdResolver' => new IdpResolver('idp'),
             'request' => Request::create('/logout'),
             'token' => new SamlToken(new TestUser('tester'), 'foo', [], [SamlAuthenticator::SESSION_INDEX_ATTRIBUTE => 'session_index']),
         ];
+    }
+
+    /**
+     * @param callable(TestCase): AuthRegistryInterface $authRegistry
+     */
+    #[DataProvider('provideCases')]
+    public function test(callable $authRegistry, IdpResolverInterface $ipdResolver, Request $request, ?TokenInterface $token): void
+    {
+        $event = $this->createMock(LogoutEvent::class);
+        $event
+            ->method('getRequest')
+            ->willReturn($request)
+        ;
+        $event
+            ->expects($token ? self::once() : self::never())
+            ->method('getToken')
+            ->willReturn($token)
+        ;
+
+        (new SamlLogoutListener($authRegistry($this), $ipdResolver))->processSingleLogout($event);
     }
 }

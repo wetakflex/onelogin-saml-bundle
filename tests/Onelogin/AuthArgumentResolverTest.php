@@ -9,6 +9,7 @@ use Nbgrp\OneloginSamlBundle\Idp\IdpResolver;
 use Nbgrp\OneloginSamlBundle\Onelogin\AuthArgumentResolver;
 use Nbgrp\OneloginSamlBundle\Onelogin\AuthRegistry;
 use OneLogin\Saml2\Auth;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\ControllerMetadata\ArgumentMetadata;
@@ -16,12 +17,11 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 
 /**
- * @covers \Nbgrp\OneloginSamlBundle\Onelogin\AuthArgumentResolver
- *
  * @internal
  *
  * @psalm-suppress MixedArgumentTypeCoercion
  */
+#[CoversClass(AuthArgumentResolver::class)]
 final class AuthArgumentResolverTest extends TestCase
 {
     public function testResolve(): void
@@ -29,10 +29,10 @@ final class AuthArgumentResolverTest extends TestCase
         $authRegistry = new AuthRegistry();
         $idpResolver = new IdpResolver('idp');
 
-        $defaultAuth = $this->createStub(Auth::class);
+        $defaultAuth = self::createStub(Auth::class);
         $authRegistry->addService('default', $defaultAuth);
 
-        $additionalAuth = $this->createStub(Auth::class);
+        $additionalAuth = self::createStub(Auth::class);
         $authRegistry->addService('additional', $additionalAuth);
 
         $resolver = new AuthArgumentResolver($authRegistry, $idpResolver);

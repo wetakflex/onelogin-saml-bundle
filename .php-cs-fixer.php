@@ -76,6 +76,13 @@ return (new PhpCsFixer\Config())
                 'function',
             ],
         ],
+        'phpdoc_order' => [
+            'order' => [
+                'param',
+                'throws',
+                'return',
+            ],
+        ],
         'phpdoc_separation' => false,
         'phpdoc_summary' => false,
         'phpdoc_to_comment' => false,

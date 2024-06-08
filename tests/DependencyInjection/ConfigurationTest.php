@@ -6,28 +6,21 @@ declare(strict_types=1);
 namespace Nbgrp\Tests\OneloginSamlBundle\DependencyInjection;
 
 use Nbgrp\OneloginSamlBundle\DependencyInjection\Configuration;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\Config\Definition\Processor;
 
 /**
- * @covers \Nbgrp\OneloginSamlBundle\DependencyInjection\Configuration
- *
  * @internal
  */
+#[CoversClass(Configuration::class)]
 final class ConfigurationTest extends TestCase
 {
     private Processor $processor;
 
-    /**
-     * @dataProvider provideValidConfigCases
-     */
-    public function testValidConfig(array $config, array $expected): void
-    {
-        self::assertSame($expected, $this->processor->processConfiguration(new Configuration(), [$config]));
-    }
-
-    public function provideValidConfigCases(): iterable
+    public static function provideValidConfigCases(): iterable
     {
         yield 'Simple configuration' => [
             'config' => [
@@ -301,17 +294,7 @@ final class ConfigurationTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider provideConfigWithInvalidOneLoginSettingsExceptionCases
-     */
-    public function testConfigWithInvalidOneLoginSettingsException(array $config, string $expectedMessage): void
-    {
-        $this->expectException(InvalidConfigurationException::class);
-        $this->expectExceptionMessage($expectedMessage);
-        $this->processor->processConfiguration(new Configuration(), [$config]);
-    }
-
-    public function provideConfigWithInvalidOneLoginSettingsExceptionCases(): iterable
+    public static function provideConfigWithInvalidOneLoginSettingsExceptionCases(): iterable
     {
         yield 'Empty idp OneLogin settings' => [
             'config' => [
@@ -715,6 +698,20 @@ final class ConfigurationTest extends TestCase
             ],
             'expectedMessage' => 'The path "nbgrp_onelogin_saml.entity_manager_name" cannot contain an empty value, but got "".',
         ];
+    }
+
+    #[DataProvider('provideValidConfigCases')]
+    public function testValidConfig(array $config, array $expected): void
+    {
+        self::assertSame($expected, $this->processor->processConfiguration(new Configuration(), [$config]));
+    }
+
+    #[DataProvider('provideConfigWithInvalidOneLoginSettingsExceptionCases')]
+    public function testConfigWithInvalidOneLoginSettingsException(array $config, string $expectedMessage): void
+    {
+        $this->expectException(InvalidConfigurationException::class);
+        $this->expectExceptionMessage($expectedMessage);
+        $this->processor->processConfiguration(new Configuration(), [$config]);
     }
 
     protected function setUp(): void
