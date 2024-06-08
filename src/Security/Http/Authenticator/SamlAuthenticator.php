@@ -68,7 +68,7 @@ class SamlAuthenticator implements AuthenticatorInterface, AuthenticationEntryPo
     {
         $uri = $this->httpUtils->generateUri($request, (string) $this->options['login_path']);
         $idp = $this->idpResolver->resolve($request);
-        if ($idp) {
+        if ($idp !== null && $idp !== '') {
             $uri .= '?'.$this->idpParameterName.'='.$idp;
         }
 
@@ -126,7 +126,7 @@ class SamlAuthenticator implements AuthenticatorInterface, AuthenticationEntryPo
     {
         $requestId = null;
         $security = $oneLoginAuth->getSettings()->getSecurityData();
-        if ($security['rejectUnsolicitedResponsesWithInResponseTo'] ?? false) {
+        if (($security['rejectUnsolicitedResponsesWithInResponseTo'] ?? false) !== false) {
             /** @var string $requestId */
             $requestId = $session->get(self::LAST_REQUEST_ID);
         }
@@ -179,7 +179,7 @@ class SamlAuthenticator implements AuthenticatorInterface, AuthenticationEntryPo
 
     protected function extractAttributes(Auth $oneLoginAuth): array
     {
-        $attributes = $this->options['use_attribute_friendly_name'] ?? false
+        $attributes = ($this->options['use_attribute_friendly_name'] ?? false) !== false
             ? $oneLoginAuth->getAttributesWithFriendlyName()
             : $oneLoginAuth->getAttributes();
         $attributes[self::SESSION_INDEX_ATTRIBUTE] = $oneLoginAuth->getSessionIndex();
@@ -215,7 +215,7 @@ class SamlAuthenticator implements AuthenticatorInterface, AuthenticationEntryPo
     {
         try {
             $idp = $this->idpResolver->resolve($request);
-            $authService = $idp
+            $authService = ($idp !== null && $idp !== '')
                 ? $this->authRegistry->getService($idp)
                 : $this->authRegistry->getDefaultService();
         } catch (\RuntimeException $exception) {

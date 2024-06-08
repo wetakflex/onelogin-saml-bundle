@@ -8,23 +8,23 @@ namespace Nbgrp\Tests\OneloginSamlBundle\Onelogin;
 use Nbgrp\OneloginSamlBundle\Onelogin\AuthRegistry;
 use Nbgrp\OneloginSamlBundle\Onelogin\AuthRegistryInterface;
 use OneLogin\Saml2\Auth;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @covers \Nbgrp\OneloginSamlBundle\Onelogin\AuthRegistry
- *
  * @internal
  */
+#[CoversClass(AuthRegistry::class)]
 final class AuthRegistryTest extends TestCase
 {
     private AuthRegistryInterface $registry;
 
     public function testRegistry(): void
     {
-        $defaultAuth = $this->createStub(Auth::class);
+        $defaultAuth = self::createStub(Auth::class);
         $this->registry->addService('default', $defaultAuth);
 
-        $additionalAuth = $this->createStub(Auth::class);
+        $additionalAuth = self::createStub(Auth::class);
         $this->registry->addService('additional', $additionalAuth);
 
         self::assertTrue($this->registry->hasService('default'));
@@ -44,7 +44,7 @@ final class AuthRegistryTest extends TestCase
 
     public function testAddExistenceServiceException(): void
     {
-        $defaultAuth = $this->createStub(Auth::class);
+        $defaultAuth = self::createStub(Auth::class);
         $this->registry->addService('default', $defaultAuth);
 
         $this->expectException(\OverflowException::class);

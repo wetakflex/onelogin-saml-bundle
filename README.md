@@ -21,6 +21,12 @@
 > use [hslavich/oneloginsaml-bundle](https://github.com/hslavich/OneloginSamlBundle)
 > which this bundle based on.
 
+### Compatibility
+| Branch  | Symfony   |
+|---------|-----------|
+| 1.x     | Symfony 6 |
+| **2.x** | Symfony 7 |
+
 ## Installation
 
 ```

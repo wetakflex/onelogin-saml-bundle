@@ -7,10 +7,10 @@ namespace Nbgrp\OneloginSamlBundle\Idp;
 
 use Symfony\Component\HttpFoundation\Request;
 
-final class IdpResolver implements IdpResolverInterface
+final readonly class IdpResolver implements IdpResolverInterface
 {
     public function __construct(
-        private readonly string $idpParameterName,
+        private string $idpParameterName,
     ) {}
 
     public function resolve(Request $request): ?string

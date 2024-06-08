@@ -8,13 +8,13 @@ namespace Nbgrp\Tests\OneloginSamlBundle\Controller;
 use Nbgrp\OneloginSamlBundle\Controller\Metadata;
 use OneLogin\Saml2\Auth;
 use OneLogin\Saml2\Settings;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @covers \Nbgrp\OneloginSamlBundle\Controller\Metadata
- *
  * @internal
  */
+#[CoversClass(Metadata::class)]
 final class MetadataTest extends TestCase
 {
     public function testInvoke(): void

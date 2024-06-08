@@ -7,16 +7,16 @@ namespace Nbgrp\Tests\OneloginSamlBundle\DependencyInjection\Security\UserProvid
 
 use Nbgrp\OneloginSamlBundle\DependencyInjection\Security\UserProvider\SamlUserProviderFactory;
 use Nbgrp\Tests\OneloginSamlBundle\TestUser;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 /**
- * @covers \Nbgrp\OneloginSamlBundle\DependencyInjection\Security\UserProvider\SamlUserProviderFactory
- *
  * @internal
  */
+#[CoversClass(SamlUserProviderFactory::class)]
 final class SamlUserProviderFactoryTest extends TestCase
 {
     private SamlUserProviderFactory $factory;

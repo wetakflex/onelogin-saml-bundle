@@ -6,6 +6,8 @@ declare(strict_types=1);
 namespace Nbgrp\Tests\OneloginSamlBundle\Security\Http\Authentication;
 
 use Nbgrp\OneloginSamlBundle\Security\Http\Authentication\SamlAuthenticationSuccessHandler;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -14,30 +16,12 @@ use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Http\HttpUtils;
 
 /**
- * @covers \Nbgrp\OneloginSamlBundle\Security\Http\Authentication\SamlAuthenticationSuccessHandler
- *
  * @internal
  */
+#[CoversClass(SamlAuthenticationSuccessHandler::class)]
 final class SamlAuthenticationSuccessHandlerTest extends TestCase
 {
-    /**
-     * @dataProvider provideHandlerCases
-     */
-    public function testHandler(array $options, Request $request, string $expectedLocation): void
-    {
-        $token = $this->createStub(TokenInterface::class);
-        $urlGenerator = $this->createConfiguredMock(UrlGeneratorInterface::class, [
-            'generate' => 'http://localhost/login',
-        ]);
-        $handler = new SamlAuthenticationSuccessHandler(new HttpUtils($urlGenerator), $options);
-        $response = $handler->onAuthenticationSuccess($request, $token);
-
-        self::assertNotNull($response);
-        self::assertSame(Response::HTTP_FOUND, $response->getStatusCode());
-        self::assertSame($expectedLocation, $response->headers->get('Location'));
-    }
-
-    public function provideHandlerCases(): iterable
+    public static function provideHandlerCases(): iterable
     {
         yield 'Always use default target path' => [
             'options' => [
@@ -84,11 +68,26 @@ final class SamlAuthenticationSuccessHandlerTest extends TestCase
         ];
     }
 
+    #[DataProvider('provideHandlerCases')]
+    public function testHandler(array $options, Request $request, string $expectedLocation): void
+    {
+        $token = self::createStub(TokenInterface::class);
+        $urlGenerator = $this->createConfiguredMock(UrlGeneratorInterface::class, [
+            'generate' => 'http://localhost/login',
+        ]);
+        $handler = new SamlAuthenticationSuccessHandler(new HttpUtils($urlGenerator), $options);
+        $response = $handler->onAuthenticationSuccess($request, $token);
+
+        self::assertNotNull($response);
+        self::assertSame(Response::HTTP_FOUND, $response->getStatusCode());
+        self::assertSame($expectedLocation, $response->headers->get('Location'));
+    }
+
     public function testEmptyRelayState(): void
     {
         $request = Request::create('/', 'GET', ['RelayState' => '']);
-        $token = $this->createStub(TokenInterface::class);
-        $handler = new SamlAuthenticationSuccessHandler(new HttpUtils($this->createStub(UrlGeneratorInterface::class)));
+        $token = self::createStub(TokenInterface::class);
+        $handler = new SamlAuthenticationSuccessHandler(new HttpUtils(self::createStub(UrlGeneratorInterface::class)));
 
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Cannot redirect to an empty URL');

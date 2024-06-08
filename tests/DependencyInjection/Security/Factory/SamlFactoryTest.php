@@ -10,6 +10,7 @@ use Nbgrp\OneloginSamlBundle\EventListener\User\UserCreatedListener;
 use Nbgrp\OneloginSamlBundle\EventListener\User\UserModifiedListener;
 use Nbgrp\OneloginSamlBundle\Security\Http\Authentication\SamlAuthenticationSuccessHandler;
 use Nbgrp\OneloginSamlBundle\Security\Http\Authenticator\SamlAuthenticator;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\DependencyInjection\ChildDefinition;
@@ -18,10 +19,9 @@ use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
 
 /**
- * @covers \Nbgrp\OneloginSamlBundle\DependencyInjection\Security\Factory\SamlFactory
- *
  * @internal
  */
+#[CoversClass(SamlFactory::class)]
 final class SamlFactoryTest extends TestCase
 {
     private SamlFactory $factory;

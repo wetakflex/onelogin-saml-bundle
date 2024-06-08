@@ -7,13 +7,13 @@ namespace Nbgrp\Tests\OneloginSamlBundle\Security\User;
 
 use Nbgrp\OneloginSamlBundle\Security\User\SamlUserFactory;
 use Nbgrp\Tests\OneloginSamlBundle\TestUser;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @covers \Nbgrp\OneloginSamlBundle\Security\User\SamlUserFactory
- *
  * @internal
  */
+#[CoversClass(SamlUserFactory::class)]
 final class SamlUserFactoryTest extends TestCase
 {
     public function testCreateUser(): void

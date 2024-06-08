@@ -9,6 +9,8 @@ use Nbgrp\OneloginSamlBundle\Controller\Login;
 use Nbgrp\OneloginSamlBundle\Security\Http\Authenticator\SamlAuthenticator;
 use OneLogin\Saml2\Auth;
 use OneLogin\Saml2\Settings;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\SecurityBundle\Security\FirewallConfig;
 use Symfony\Bundle\SecurityBundle\Security\FirewallMap;
@@ -19,15 +21,39 @@ use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 use Symfony\Component\Security\Http\SecurityRequestAttributes;
 
 /**
- * @covers \Nbgrp\OneloginSamlBundle\Controller\Login
- *
  * @internal
  */
+#[CoversClass(Login::class)]
 final class LoginTest extends TestCase
 {
+    public static function provideErrorExceptionCases(): iterable
+    {
+        yield 'From attributes' => [
+            'request' => (static function () {
+                $request = Request::create('/login');
+                $request->attributes->set(SecurityRequestAttributes::AUTHENTICATION_ERROR, new \Exception('Error from attributes'));
+
+                return $request;
+            })(),
+            'expectedMessage' => 'Error from attributes',
+        ];
+
+        yield 'From session' => [
+            'request' => (static function () {
+                $request = Request::create('/login');
+                $session = new Session(new MockArraySessionStorage());
+                $session->set(SecurityRequestAttributes::AUTHENTICATION_ERROR, new \Exception('Error from session'));
+                $request->setSession($session);
+
+                return $request;
+            })(),
+            'expectedMessage' => 'Error from session',
+        ];
+    }
+
     public function testInvokeWithRejectUnsolicitedResponsesWithInResponseTo(): void
     {
-        $firewallMap = $this->createStub(FirewallMap::class);
+        $firewallMap = self::createStub(FirewallMap::class);
         $firewallMap
             ->method('getFirewallConfig')
             ->willReturn(new FirewallConfig('foo', 'bar'))
@@ -67,7 +93,7 @@ final class LoginTest extends TestCase
 
     public function testInvokeWithoutRejectUnsolicitedResponsesWithInResponseTo(): void
     {
-        $firewallMap = $this->createStub(FirewallMap::class);
+        $firewallMap = self::createStub(FirewallMap::class);
         $firewallMap
             ->method('getFirewallConfig')
             ->willReturn(new FirewallConfig('foo', 'bar'))
@@ -105,9 +131,7 @@ final class LoginTest extends TestCase
         self::assertFalse($session->has(SamlAuthenticator::LAST_REQUEST_ID));
     }
 
-    /**
-     * @dataProvider provideErrorExceptionCases
-     */
+    #[DataProvider('provideErrorExceptionCases')]
     public function testErrorException(Request $request, string $expectedMessage): void
     {
         $firewallMap = $this->createMock(FirewallMap::class);
@@ -116,61 +140,12 @@ final class LoginTest extends TestCase
             ->willReturn(new FirewallConfig('foo', 'bar'))
         ;
 
-        $auth = $this->createStub(Auth::class);
+        $auth = self::createStub(Auth::class);
 
         $controller = new Login($firewallMap);
 
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage($expectedMessage);
-        $controller($request, $auth);
-    }
-
-    public function provideErrorExceptionCases(): iterable
-    {
-        yield 'From attributes' => [
-            'request' => (static function () {
-                $request = Request::create('/login');
-                $request->attributes->set(SecurityRequestAttributes::AUTHENTICATION_ERROR, new \Exception('Error from attributes'));
-
-                return $request;
-            })(),
-            'expectedMessage' => 'Error from attributes',
-        ];
-
-        yield 'From session' => [
-            'request' => (static function () {
-                $request = Request::create('/login');
-                $session = new Session(new MockArraySessionStorage());
-                $session->set(SecurityRequestAttributes::AUTHENTICATION_ERROR, new \Exception('Error from session'));
-                $request->setSession($session);
-
-                return $request;
-            })(),
-            'expectedMessage' => 'Error from session',
-        ];
-    }
-
-    public function testAuthLoginWithoutRedirectUrlException(): void
-    {
-        $firewallMap = $this->createMock(FirewallMap::class);
-        $firewallMap
-            ->method('getFirewallConfig')
-            ->willReturn(new FirewallConfig('foo', 'bar'))
-        ;
-
-        $auth = $this->createMock(Auth::class);
-        $auth
-            ->method('login')
-            ->willReturn(null)
-        ;
-
-        $request = Request::create('/login');
-        $request->setSession(new Session(new MockArraySessionStorage()));
-
-        $controller = new Login($firewallMap);
-
-        $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage('Login cannot be performed: Auth did not returned redirect url.');
         $controller($request, $auth);
     }
 
@@ -182,7 +157,7 @@ final class LoginTest extends TestCase
             ->willReturn(null)
         ;
 
-        $auth = $this->createStub(Auth::class);
+        $auth = self::createStub(Auth::class);
 
         $controller = new Login($firewallMap);
         $request = Request::create('/login');

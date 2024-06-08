@@ -7,15 +7,15 @@ namespace Nbgrp\Tests\OneloginSamlBundle\DependencyInjection\Compiler;
 
 use Nbgrp\OneloginSamlBundle\DependencyInjection\Compiler\AuthRegistryCompilerPass;
 use Nbgrp\OneloginSamlBundle\Onelogin\AuthRegistryInterface;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 
 /**
- * @covers \Nbgrp\OneloginSamlBundle\DependencyInjection\Compiler\AuthRegistryCompilerPass
- *
  * @internal
  */
+#[CoversClass(AuthRegistryCompilerPass::class)]
 final class AuthRegistryCompilerPassTest extends TestCase
 {
     public function testSuccessProcess(): void

@@ -7,15 +7,15 @@ namespace Nbgrp\OneloginSamlBundle\Security\User;
 
 use Symfony\Component\Security\Core\User\UserInterface;
 
-final class SamlUserFactory implements SamlUserFactoryInterface
+final readonly class SamlUserFactory implements SamlUserFactoryInterface
 {
     /**
      * @param class-string<UserInterface> $userClass
      * @param array<string, mixed>        $mapping
      */
     public function __construct(
-        private readonly string $userClass,
-        private readonly array $mapping,
+        private string $userClass,
+        private array $mapping,
     ) {}
 
     public function createUser(string $identifier, array $attributes): UserInterface

@@ -17,18 +17,18 @@ use Symfony\Component\Security\Http\Event\LogoutEvent;
 /**
  * Process Single Logout by current OneLogin Auth service on user logout.
  */
-final class SamlLogoutListener
+final readonly class SamlLogoutListener
 {
     public function __construct(
-        private readonly AuthRegistryInterface $authRegistry,
-        private readonly IdpResolverInterface $idpResolver,
+        private AuthRegistryInterface $authRegistry,
+        private IdpResolverInterface $idpResolver,
     ) {}
 
     #[AsEventListener(LogoutEvent::class)]
     public function processSingleLogout(LogoutEvent $event): void
     {
         $authService = $this->getAuthService($event->getRequest());
-        if (!$authService) {
+        if ($authService === null) {
             return;
         }
 
@@ -40,20 +40,23 @@ final class SamlLogoutListener
         try {
             $authService->processSLO();
         } catch (\OneLogin\Saml2\Error) {
-            if (!empty($authService->getSLOurl())) {
-                /** @var string|null $sessionIndex */
-                $sessionIndex = $token->hasAttribute(SamlAuthenticator::SESSION_INDEX_ATTRIBUTE)
-                    ? $token->getAttribute(SamlAuthenticator::SESSION_INDEX_ATTRIBUTE)
-                    : null;
-                $authService->logout(null, [], $token->getUserIdentifier(), $sessionIndex);
+            $sloUrl = $authService->getSLOurl();
+            if ($sloUrl === null || $sloUrl === '') {
+                return;
             }
+
+            /** @var string|null $sessionIndex */
+            $sessionIndex = $token->hasAttribute(SamlAuthenticator::SESSION_INDEX_ATTRIBUTE)
+                ? $token->getAttribute(SamlAuthenticator::SESSION_INDEX_ATTRIBUTE)
+                : null;
+            $authService->logout(null, [], $token->getUserIdentifier(), $sessionIndex);
         }
     }
 
     private function getAuthService(Request $request): ?Auth
     {
         $idp = $this->idpResolver->resolve($request);
-        if (!$idp) {
+        if ($idp === null || $idp === '') {
             return $this->authRegistry->getDefaultService();
         }
 
