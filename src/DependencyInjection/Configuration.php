@@ -178,6 +178,14 @@ class Configuration implements ConfigurationInterface
                                             ->thenInvalid('invalid value.')
                                         ->end()
                                     ->end()
+                                    ->enumNode('requestedAuthnContextComparison')
+                                        ->values([
+                                            'exact',
+                                            'minimum',
+                                            'maximum',
+                                            'better',
+                                        ])
+                                    ->end()
                                     ->booleanNode('wantXMLValidation')->end()
                                     ->booleanNode('relaxDestinationValidation')->end()
                                     ->booleanNode('destinationStrictlyMatches')->end()
