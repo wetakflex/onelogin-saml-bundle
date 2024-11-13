@@ -5,6 +5,7 @@ declare(strict_types=1);
 
 namespace Nbgrp\OneloginSamlBundle\Security\Http\Authenticator;
 
+use AlejandriaBundle\Services\Security\Encrypt\DataEncryptService;
 use Nbgrp\OneloginSamlBundle\Event\UserCreatedEvent;
 use Nbgrp\OneloginSamlBundle\Event\UserModifiedEvent;
 use Nbgrp\OneloginSamlBundle\Idp\IdpResolverInterface;
@@ -56,6 +57,7 @@ class SamlAuthenticator implements AuthenticatorInterface, AuthenticationEntryPo
         private readonly ?LoggerInterface $logger,
         private readonly string $idpParameterName,
         private readonly bool $useProxyVars,
+        private readonly DataEncryptService $dataEncryptService,
     ) {}
 
     public function supports(Request $request): ?bool
@@ -141,8 +143,12 @@ class SamlAuthenticator implements AuthenticatorInterface, AuthenticationEntryPo
 
         $deferredEventBadge = new DeferredEventBadge();
 
+        $username = $this->extractIdentifier($oneLoginAuth, $attributes);
+        // Encripto username para que concuerde con el valor encriptado en BD
+        $identifier = $this->dataEncryptService->execute($username, false, false);
+
         $userBadge = new UserBadge(
-            $this->extractIdentifier($oneLoginAuth, $attributes),
+            $identifier,
             function (string $identifier) use ($deferredEventBadge, $attributes) {
                 try {
                     try {

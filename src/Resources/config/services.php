@@ -5,6 +5,7 @@ declare(strict_types=1);
 
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
+use AlejandriaBundle\Services\Security\Encrypt\DataEncryptService;
 use Doctrine\ORM\EntityManagerInterface;
 use Nbgrp\OneloginSamlBundle\Controller;
 use Nbgrp\OneloginSamlBundle\EventListener;
@@ -86,6 +87,7 @@ return static function (ContainerConfigurator $container): void {
                 /* 8 */ service(LoggerInterface::class)->nullOnInvalid(),
                 /* 9 */ param('nbgrp_onelogin_saml.idp_parameter_name'),
                 /* 10 */ param('nbgrp_onelogin_saml.use_proxy_vars'),
+                /* 11 */ service(DataEncryptService::class),
             ])
     ;
 };
