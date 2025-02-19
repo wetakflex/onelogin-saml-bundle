@@ -5,6 +5,7 @@ declare(strict_types=1);
 
 namespace Nbgrp\OneloginSamlBundle\Security\Http\Authenticator;
 
+use AlejandriaBundle\Entity\Base\Traits\filterClean;
 use AlejandriaBundle\Services\Security\Encrypt\DataEncryptService;
 use Nbgrp\OneloginSamlBundle\Event\UserCreatedEvent;
 use Nbgrp\OneloginSamlBundle\Event\UserModifiedEvent;
@@ -42,6 +43,8 @@ use Symfony\Component\Security\Http\HttpUtils;
 #[AutoconfigureTag('monolog.logger', ['channel' => 'security'])]
 class SamlAuthenticator implements AuthenticatorInterface, AuthenticationEntryPointInterface
 {
+    use filterClean;
+
     public const SESSION_INDEX_ATTRIBUTE = '_saml_session_index';
     public const LAST_REQUEST_ID = '_saml_last_request_id';
 
