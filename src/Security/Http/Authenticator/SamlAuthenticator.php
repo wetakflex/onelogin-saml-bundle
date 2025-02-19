@@ -144,8 +144,20 @@ class SamlAuthenticator implements AuthenticatorInterface, AuthenticationEntryPo
         $deferredEventBadge = new DeferredEventBadge();
 
         $username = $this->extractIdentifier($oneLoginAuth, $attributes);
-        // Encripto username para que concuerde con el valor encriptado en BD
-        $identifier = $this->dataEncryptService->execute($username, false, false);
+
+        // Limpio el username para la consulta en BD
+        $cleanUsername = $this->cleanUsername($username);
+
+        // Genero el identificador encriptado con el username limpio
+        $identifier = $this->dataEncryptService->execute($cleanUsername, false, false);
+
+        // Verifico si el usuario existe en la BD
+        $existUser = $this->userProvider->loadUserByIdentifier($identifier);
+
+        // Si no se encuentra el usuario, intento con el username sin limpiar
+        if (!$existUser instanceof SamlUserInterface) {
+            $identifier = $this->dataEncryptService->execute($username, false, false);
+        }
 
         $userBadge = new UserBadge(
             $identifier,
