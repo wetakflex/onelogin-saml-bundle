@@ -28,6 +28,7 @@ return static function (ContainerConfigurator $container): void {
         ->set(Controller\Login::class)
             ->args([
                 service('security.firewall.map'),
+                service('router'),
             ])
 
         ->set(EventListener\Security\SamlLogoutListener::class)
