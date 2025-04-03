@@ -13,13 +13,17 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpKernel\Attribute\AsController;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
+use Symfony\Component\Routing\Router;
 use Symfony\Component\Security\Http\SecurityRequestAttributes;
+
+use function Sentry\captureException;
 
 #[AsController]
 class Login
 {
     public function __construct(
         private readonly FirewallMap $firewallMap,
+        private readonly Router $router,
     ) {}
 
     public function __invoke(Request $request, Auth $auth): RedirectResponse
@@ -41,7 +45,8 @@ class Login
         }
 
         if ($error instanceof \Throwable) {
-            throw new \RuntimeException($error->getMessage());
+            captureException($error);
+            return new RedirectResponse($this->router->generate('frontend_homepage'));
         }
 
         return new RedirectResponse($this->processLoginAndGetRedirectUrl($auth, $targetPath, $session));
