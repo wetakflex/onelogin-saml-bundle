@@ -154,14 +154,6 @@ class SamlAuthenticator implements AuthenticatorInterface, AuthenticationEntryPo
         // Genero el identificador encriptado con el username limpio
         $identifier = $this->dataEncryptService->execute($cleanUsername, false, false);
 
-        // Verifico si el usuario existe en la BD
-        $existUser = $this->userProvider->loadUserByIdentifier($identifier);
-
-        // Si no se encuentra el usuario, intento con el username sin limpiar
-        if (!$existUser instanceof SamlUserInterface) {
-            $identifier = $this->dataEncryptService->execute($username, false, false);
-        }
-
         $userBadge = new UserBadge(
             $identifier,
             function (string $identifier) use ($deferredEventBadge, $attributes) {
